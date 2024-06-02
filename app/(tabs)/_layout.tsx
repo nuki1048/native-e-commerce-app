@@ -1,34 +1,64 @@
+import IconButton from '@/components/ButtonIcon';
+import { ControlBottomTabsProvider } from '@/context/ControlBottomTabsContext';
+import { useControlBottomTabs } from '@/hooks/useControlBottomTabs';
+import { useThemeColor } from '@/hooks/useThemeColor';
+import { Ionicons, AntDesign } from '@expo/vector-icons';
+import { useRoute } from '@react-navigation/native';
 import { Tabs } from 'expo-router';
-import React from 'react';
 
-import { TabBarIcon } from '@/components/navigation/TabBarIcon';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
+export type RootParamsList = {
+  home: {
+    categories: undefined;
+    categoryDetail: undefined;
+  };
+  cart: undefined;
+  profile: undefined;
+};
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const { showTabs } = useControlBottomTabs();
+  const activeTabColor = useThemeColor({}, 'tabIconSelected');
+  const inactiveTabColor = useThemeColor({}, 'tabIconDefault');
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-      }}>
+        tabBarActiveTintColor: activeTabColor,
+        tabBarInactiveTintColor: inactiveTabColor,
+        tabBarShowLabel: false,
+        headerTitleAlign: 'left',
+        headerTransparent: true,
+        tabBarStyle: {
+          display: showTabs ? 'flex' : 'none',
+        },
+      }}
+    >
       <Tabs.Screen
-        name="index"
+        name='home'
         options={{
           title: 'Home',
-          tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />
+          tabBarIcon: ({ color }) => (
+            <Ionicons size={24} name='grid' color={color} />
           ),
+          headerShown: false,
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name='cart'
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'code-slash' : 'code-slash-outline'} color={color} />
+          title: 'Cart',
+          tabBarIcon: ({ color }) => (
+            <AntDesign name='shoppingcart' size={24} color={color} />
+          ),
+          headerShown: false,
+        }}
+      />
+      <Tabs.Screen
+        name='profile'
+        options={{
+          title: 'Profile',
+          tabBarIcon: ({ color }) => (
+            <AntDesign size={24} name='user' color={color} />
           ),
         }}
       />
