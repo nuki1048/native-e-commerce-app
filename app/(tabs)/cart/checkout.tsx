@@ -5,11 +5,19 @@ import Button, { Type } from '@/components/Button';
 import { Colors } from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
 import TextOption from '@/components/TextOption';
+import { useNavigation } from 'expo-router';
+import { NativeStackNavigationProp } from 'react-native-screens/lib/typescript/native-stack/types';
+import { StackParamsList } from './_layout';
+import { useCartStore } from '@/store/cartStore';
 
 const Checkout = () => {
+  const { cart } = useCartStore();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<StackParamsList, 'checkout'>>();
   const creaditCardFull = '1234 1234 1234 1234';
   const creditCardText = `**** **** **** ${creaditCardFull.slice(-4)}`;
   const [checked, setChecked] = useState<boolean>(false);
+  console.log(cart);
   return (
     <ScrollView>
       <View style={styles.container}>
@@ -20,6 +28,7 @@ const Checkout = () => {
               type={Type.Ghost}
               style={styles.buttonChange}
               textStyle={styles.textButtonChange}
+              onPress={() => navigation.navigate('creditCard')}
             >
               Change
             </Button>

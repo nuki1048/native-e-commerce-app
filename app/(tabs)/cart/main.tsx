@@ -5,21 +5,14 @@ import Button from '@/components/Button';
 import { useNavigation } from 'expo-router';
 import { NativeStackNavigationProp } from 'react-native-screens/lib/typescript/native-stack/types';
 import { StackParamsList } from './_layout';
+import { useCartStore } from '@/store/cartStore';
+import { type CartItem as ItemCart } from '@/types/main';
 
-const data = [
-  { id: '1', name: 'Cabbage and lettuce(14)', checked: false },
-  { id: '3', name: 'Carrot(12)', checked: false },
-  { id: '5', name: 'Cucumber(10)', checked: false },
-  { id: '6', name: 'Onion(8)', checked: false },
-  { id: '7', name: 'Pepper(6)', checked: false },
-  { id: '8', name: 'Tomato(4)', checked: false },
-  { id: '9', name: 'Potato(2)', checked: false },
-  { id: '10', name: 'Mushroom(1)', checked: false },
-];
 const Main = () => {
+  const { cart } = useCartStore();
   const navigation =
     useNavigation<NativeStackNavigationProp<StackParamsList, 'main'>>();
-  const renderCategoryItem = ({ item }: { item: (typeof data)[0] }) => {
+  const renderCategoryItem = ({ item }: { item: ItemCart }) => {
     return (
       <CartItem
         image='f'
@@ -35,9 +28,9 @@ const Main = () => {
     <View style={styles.container}>
       <FlatList
         contentContainerStyle={styles.itemCategoryContentList}
-        data={data}
+        data={cart}
         renderItem={renderCategoryItem}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id.toString()}
       />
       <Button
         style={styles.checkoutButton}

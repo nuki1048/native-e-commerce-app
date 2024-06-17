@@ -2,7 +2,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import React from 'react';
 import { Colors } from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
-
+import { capitalize } from 'lodash';
 interface Props {
   onChange: () => void;
   isChecked: boolean;
@@ -20,7 +20,7 @@ const Tag: React.FC<Props> = ({ isChecked, label, onChange }) => {
           <Ionicons name='checkmark' size={24} color={Colors.light.purple} />
         )}
         <Text style={[styles.text, isChecked && styles.textPressed]}>
-          {label}
+          {capitalize(label)}
         </Text>
       </View>
     </Pressable>

@@ -6,7 +6,7 @@ import {
   View,
   FlatList,
 } from 'react-native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ThemedText } from '@/components/ThemedText';
 import SearchInput from '@/components/SearchInput';
 import Tag from '@/components/Tag';
@@ -14,51 +14,85 @@ import CategoryItemCard from '@/components/CategoryItemCard';
 import { useNavigation } from 'expo-router';
 import { NativeStackNavigationProp } from 'react-native-screens/lib/typescript/native-stack/types';
 import { StackParamsList } from './_layout';
+import { RouteProp, useRoute } from '@react-navigation/native';
+import { Tables } from '@/types/supabase';
+import { useProductsStore } from '@/store/productsStore';
+import { useCartStore } from '@/store/cartStore';
 
-const data = [
-  { id: '1', name: 'Cabbage and lettuce(14)', checked: false },
-  { id: '3', name: 'Carrot(12)', checked: false },
-  { id: '5', name: 'Cucumber(10)', checked: false },
-  { id: '6', name: 'Onion(8)', checked: false },
-  { id: '7', name: 'Pepper(6)', checked: false },
-  { id: '8', name: 'Tomato(4)', checked: false },
-  { id: '9', name: 'Potato(2)', checked: false },
-  { id: '10', name: 'Mushroom(1)', checked: false },
-];
+export interface Tag {
+  name: string;
+  checked: boolean;
+  idProduct: number;
+}
 
 const CategoryDetail = () => {
   const navigation =
     useNavigation<
       NativeStackNavigationProp<StackParamsList, 'categoryDetail'>
     >();
-  const [pressed, setPressed] = useState(data);
+
+  const { addToCart } = useCartStore();
+  const { products, fetchProductsByCategoryId } = useProductsStore(
+    (state) => state
+  );
+  const [filteredData, setFilteredData] = useState<
+    Tables<'products'>[] | null | undefined
+  >(null);
+  const [tags, setTags] = useState<Tag[]>([]);
   const [searchValue, setSearchValue] = useState<string>('');
 
-  const renderItem = ({ item }: { item: (typeof data)[0] }) => {
+  const route = useRoute<RouteProp<StackParamsList, 'categoryDetail'>>();
+  const { id, name: categoryName } = route.params;
+
+  useEffect(() => {
+    fetchProductsByCategoryId(id);
+  }, []);
+
+  useEffect(() => {
+    const filteredData = products?.filter((product) => {
+      return tags?.some((tag) => {
+        return tag.checked && product.tags?.includes(tag.name);
+      });
+    });
+
+    setFilteredData(filteredData?.length ?? 0 > 0 ? filteredData : products);
+  }, [tags]);
+
+  useEffect(() => {
+    const filteredData = products?.filter((item) =>
+      item.name.toLowerCase().includes(searchValue.toLowerCase())
+    );
+
+    setFilteredData(filteredData);
+  }, [searchValue]);
+
+  const handleCheckFilterTag = (tag: Tag) => {
+    setTags(
+      tags?.map((t) =>
+        t.name === tag.name ? { ...t, checked: !t.checked } : t
+      )
+    );
+  };
+
+  const renderFilterTag = ({ item }: { item: Tag }) => {
     return (
       <Tag
         isChecked={item.checked}
         label={item.name}
-        onChange={() =>
-          setPressed(
-            pressed.map((tag) =>
-              tag.id === item.id ? { ...tag, checked: !tag.checked } : tag
-            )
-          )
-        }
+        onChange={() => handleCheckFilterTag(item)}
       />
     );
   };
 
-  const renderCategoryItem = ({ item }: { item: (typeof data)[0] }) => {
+  const renderCategoryItem = ({ item }: { item: Tables<'products'> }) => {
     return (
       <CategoryItemCard
         image='f'
         label={item.name}
-        onBuy={() => {}}
+        onBuy={() => addToCart({ ...item, quantity: 1 })}
         onLike={() => {}}
         onPress={() => {
-          navigation.navigate('itemDetails');
+          navigation.navigate('itemDetails', { id: item.id });
         }}
         price='1.10'
       />
@@ -76,7 +110,7 @@ const CategoryDetail = () => {
       <SafeAreaView style={styles.safeAreaContainer}>
         <View style={styles.outerContainer}>
           <ThemedText type='title' lightColor='black'>
-            Vegetables
+            {categoryName}
           </ThemedText>
           <SearchInput
             style={styles.input}
@@ -88,18 +122,18 @@ const CategoryDetail = () => {
               horizontal
               style={styles.list}
               contentContainerStyle={styles.contentList}
-              data={pressed}
-              renderItem={renderItem}
-              keyExtractor={(item) => item.id}
+              data={tags || []}
+              renderItem={renderFilterTag}
+              keyExtractor={(item) => item.name}
             />
           </View>
           <View style={styles.itemsList}>
             <FlatList
               style={styles.itemCategoryList}
               contentContainerStyle={styles.itemCategoryContentList}
-              data={pressed}
+              data={filteredData}
               renderItem={renderCategoryItem}
-              keyExtractor={(item) => item.id}
+              keyExtractor={(item) => item.id.toString()}
             />
           </View>
         </View>
@@ -153,6 +187,6 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   itemCategoryList: {
-    marginBottom: 165,
+    marginBottom: 150,
   },
 });

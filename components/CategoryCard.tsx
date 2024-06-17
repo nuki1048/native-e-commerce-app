@@ -2,10 +2,11 @@ import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import React from 'react';
 import { ThemedText } from './ThemedText';
 import { Colors } from '@/constants/Colors';
-interface Props {
+import { Tables } from '@/types/supabase';
+interface Props extends Tables<'categories'> {
   onPress: () => void;
 }
-const CategoryCard: React.FC<Props> = ({ onPress }) => {
+const CategoryCard: React.FC<Props> = ({ onPress, name, product_count }) => {
   return (
     <Pressable
       style={({ pressed }) => [pressed && styles.pressed]}
@@ -19,9 +20,9 @@ const CategoryCard: React.FC<Props> = ({ onPress }) => {
           />
         </View>
         <View style={styles.infoContainer}>
-          <ThemedText type='subtitle'>Vegetables</ThemedText>
+          <ThemedText type='subtitle'>{name}</ThemedText>
           <ThemedText type='default' lightColor={Colors.light.textSecondary}>
-            (43)
+            ({product_count})
           </ThemedText>
         </View>
       </View>

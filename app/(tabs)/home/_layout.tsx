@@ -5,9 +5,9 @@ import { Stack } from 'expo-router';
 import { Text, View } from 'react-native';
 
 export type StackParamsList = {
-  categories: undefined;
-  categoryDetail: undefined;
-  itemDetails: undefined;
+  allCategories: undefined;
+  categoryDetail: { id: number; name: string };
+  itemDetails: { id: number };
 };
 export default function RootLayout() {
   return (
@@ -29,7 +29,7 @@ export default function RootLayout() {
         ),
       })}
     >
-      <Stack.Screen name='categories' />
+      <Stack.Screen name='allCategories' />
       <Stack.Screen name='categoryDetail' />
       <Stack.Screen name='itemDetails' />
     </Stack>

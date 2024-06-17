@@ -1,16 +1,22 @@
-import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
-import React, { useEffect, useRef } from 'react';
-import { default as PagerView } from 'react-native-pager-view';
+import { StyleSheet, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
 import Carousel from '@/components/Carousel';
-import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { Colors } from '@/constants/Colors';
 import IconButton from '@/components/ButtonIcon';
 import Button from '@/components/Button';
 import { Ionicons } from '@expo/vector-icons';
-import { useIsFocused, useRoute } from '@react-navigation/native';
+import { RouteProp, useIsFocused, useRoute } from '@react-navigation/native';
 import { useControlBottomTabs } from '@/hooks/useControlBottomTabs';
+import { StackParamsList } from './_layout';
+import { Tables } from '@/types/supabase';
+import { fetchProduct } from '@/utils/data';
+import { useProductsStore } from '@/store/productsStore';
+import { useCartStore } from '@/store/cartStore';
 const ItemDetails = () => {
+  const { addToCart } = useCartStore();
+  const { products, fetchSingleProduct } = useProductsStore();
+  const route = useRoute<RouteProp<StackParamsList, 'itemDetails'>>();
   const { setShowTabs } = useControlBottomTabs();
   const isFocused = useIsFocused();
 
@@ -21,17 +27,24 @@ const ItemDetails = () => {
       setShowTabs(true);
     };
   }, [isFocused]);
+
+  useEffect(() => {
+    fetchSingleProduct(route.params.id);
+  }, []);
+
+  const data = products[0];
+
   return (
     <View style={{ flex: 1 }}>
       <View style={{ width: '100%', height: 280 }}>
         <Carousel />
       </View>
       <View style={styles.modal}>
-        <ThemedText type='title'>Boston Lettuce</ThemedText>
+        <ThemedText type='title'>{data?.name}</ThemedText>
         <View style={[styles.text, styles.textContainer]}>
           <ThemedText type='subtitleBold'>1.10</ThemedText>
           <ThemedText type='subtitle' lightColor={Colors.light.textSecondary}>
-            € / piece
+            {data?.price}€ / piece
           </ThemedText>
         </View>
         <ThemedText
@@ -39,7 +52,7 @@ const ItemDetails = () => {
           lightColor={Colors.light.primaryButton}
           style={styles.textGreen}
         >
-          ~ 150 gr / piece
+          ~ {data?.weight} gr / piece
         </ThemedText>
         <ThemedText type='subtitleBold' style={styles.description}>
           Spain
@@ -49,11 +62,7 @@ const ItemDetails = () => {
           lightColor={Colors.light.textSecondary}
           style={styles.text}
         >
-          Lettuce is an annual plant of the daisy family, Asteraceae. It is most
-          often grown as a leaf vegetable, but sometimes for its stem and seeds.
-          Lettuce is most often used for salads, although it is also seen in
-          other kinds of food, such as soups, sandwiches and wraps; it can also
-          be grilled.
+          {data?.description}
         </ThemedText>
         <View style={styles.buttonContainer}>
           <IconButton
@@ -64,6 +73,7 @@ const ItemDetails = () => {
           <Button
             style={styles.addToCartButton}
             icon={<Ionicons name='cart' size={24} color={Colors.light.white} />}
+            onPress={() => addToCart({ ...data, quantity: 1 })}
           >
             Add to cart
           </Button>

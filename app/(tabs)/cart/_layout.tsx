@@ -4,6 +4,7 @@ import { Stack } from 'expo-router';
 export type StackParamsList = {
   main: undefined;
   checkout: undefined;
+  creditCard: undefined;
 };
 export default function RootLayout() {
   return (
@@ -26,6 +27,7 @@ export default function RootLayout() {
     >
       <Stack.Screen name='main' />
       <Stack.Screen name='checkout' />
+      <Stack.Screen name='creditCard' />
     </Stack>
   );
 }
